@@ -55,7 +55,7 @@
 	(multiple-value-list
 	 (ppcre:scan-to-strings "([^ ]+) (<[^>]+>) (.*)" log-entry)))))
 
-(defpage index ("^/(\\d+)-(\\d+)-(\\d+)$"
+(defpage index ("^/(\\d{4})-(\\d{2})-(\\d{2})$"
 		(year month day))
   (with-html-output-to-string (s nil :prologue t)
     (:html
@@ -65,6 +65,7 @@
 	      (htm (princ (css) s))))
      (:body
       (:div :id "header"
+	    (:h1 "Lisp Logs")
 	    (:canvas :id "header-canvas"))
       (:table 
        (let ((zebra nil)
@@ -95,28 +96,40 @@
                         :color "black"
                         :font-family "monaco"
                         :font-size "12px")
-     ("table, td, tr"   :border "0" :padding "0" :border-collapse "collapse" #|"separate"|#)
+     ("table, td, tr"   :border "0" :padding "0" :border-collapse "collapse")
      ("table"           :width "600px"
                         :background-color "white"
                         :border-left "solid #eaeaea 20px"
                         :border-right "solid #eaeaea 20px"
+                        :border-top "solid #eaeaea 20px"
                         :margin-left "auto"
-                        :margin-right "auto"
-                       #| :border-spacing "10px"|#)
+                        :margin-right "auto")
      ("#header"         :width "640px" :height "200px"
                         :margin-left "auto" :margin-right "auto")
+     ("h1"              :text-align "center"
+                        :font-family " Cambria, serif"
+                        :font-size "80px"
+                        :font-style "oblique"
+                        :font-weight "normal"
+                        :text-transform "normal"
+                        :letter-spacing "normal"
+                        :line-height "2em"
+                        :color "#666666"
+                        :-webkit-transition-property "color"
+                        :-webkit-transition-timing-function "linear"
+                        :-webkit-transition-duration "1s")
+     ("h1:hover"        :color "black")
      ("#header #header-canvas"
                         :width "640px" :height "200px")
      ("tr.zebra td"     :background-color "#f0f0f0")
-     ("td"              #|:border-radius "10px"|#
-                        :padding "10px"
+     ("td"              :padding "10px"
                         :vertical-align "top"
                         :background-color "#fefefe")
+     ("tr:hover td"     :background-color "#fcfff9")
      ("td.username"     :text-align "center")
      ("div.message-div" :width "400px"
                         :word-wrap "break-word"))))
 
 
 (defun replace-links (string)
-  (multiple-value-bind (matched match-data)
-      (ppcre:all-matches-as-strings "^http://[^\s]+" string)))
+  (ppcre:all-matches "^http://\\S+" string))
