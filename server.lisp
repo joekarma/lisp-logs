@@ -5,7 +5,7 @@
 (defclass acceptor (hunchentoot:acceptor) ())
 
 (defvar *acceptor* (make-instance 'acceptor
-				  :port 5477))
+                                  :port 5477))
 
 (defparameter *routes* ())
 
@@ -18,25 +18,25 @@
 (defmacro pick-route ((request-object) &body routes-form)
   (alexandria:with-gensyms (uri routes route match match-groups)
     `(let ((,uri (hunchentoot:request-uri ,request-object))
-	   (,routes (append ',routes-form *routes*)))
+           (,routes (append ',routes-form *routes*)))
        (loop for ,route in ,routes
-	     do
-	    (multiple-value-bind (,match ,match-groups)
-		(cl-ppcre:scan-to-strings (car ,route) ,uri)
-      	      (declare (ignorable ,match-groups))
-	      (if ,match
-		  (return (funcall (second ,route) ,match-groups))))))))
+             do
+            (multiple-value-bind (,match ,match-groups)
+                (cl-ppcre:scan-to-strings (car ,route) ,uri)
+              (declare (ignorable ,match-groups))
+              (if ,match
+                  (return (funcall (second ,route) ,match-groups))))))))
 
 (defmacro defpage (page-function-name (route-regex &optional route-binding-pattern)
-		   &body body)
+                   &body body)
   (alexandria:with-gensyms (matches-from-url)
     `(progn
        (defun ,page-function-name (,matches-from-url)
-	 (,@(typecase route-binding-pattern
-		(null '(progn))
-		(list `(destructuring-bind ,route-binding-pattern (coerce ,matches-from-url 'list)))
-		(atom `(let ((,route-binding-pattern (coerce ,matches-from-url 'list))))))
-	    ,@body))
+         (,@(typecase route-binding-pattern
+                (null '(progn))
+                (list `(destructuring-bind ,route-binding-pattern (coerce ,matches-from-url 'list)))
+                (atom `(let ((,route-binding-pattern (coerce ,matches-from-url 'list))))))
+            ,@body))
        (add-route ,route-regex ',page-function-name))))
 
 (defun add-route (route function)
@@ -52,42 +52,42 @@
   (map 'list
        #'hunchentoot:escape-for-html
        (second
-	(multiple-value-list
-	 (ppcre:scan-to-strings "([^ ]+) (<[^>]+>) (.*)" log-entry)))))
+        (multiple-value-list
+         (ppcre:scan-to-strings "([^ ]+) (<[^>]+>) (.*)" log-entry)))))
 
 (defpage index ("^/(\\d{4})-(\\d{2})-(\\d{2})$"
-		(year month day))
+                (year month day))
   (with-html-output-to-string (s nil :prologue t)
     (:html
      (:head
       (:title "Lisp Logs")
       (:style :type "text/css"
-	      (htm (princ (css) s))))
+              (htm (princ (css) s))))
      (:body
       (:div :id "header"
-	    (:h1 "Lisp Logs")
-	    (:canvas :id "header-canvas"))
+            (:h1 "Lisp Logs")
+            (:canvas :id "header-canvas"))
       (:table 
        (let ((zebra nil)
-	     (last-speaker ""))
-	 (labels ((last-speaker-same-p (speaker)
-		    (string= speaker last-speaker))
-		  (zebra (user)
-		    (when (not (last-speaker-same-p user)) (setf zebra (not zebra)))
-		    (if zebra
-			"zebra"
-			"")))
-	   (loop for line in (get-log year month day)
-	      do (destructuring-bind (timestamp user message)
-		     (chat-log-parts line)
-		   (htm
-		    (:tr
-		     :class (zebra user)
-		     (htm
-		      (:td (princ timestamp s))
-		      (:td :class "username" (unless (last-speaker-same-p user) (princ user s)))
-		      (:td (:div :class "message-div" (princ message s))))
-		     (setf last-speaker user))))))))))))
+             (last-speaker ""))
+         (labels ((last-speaker-same-p (speaker)
+                    (string= speaker last-speaker))
+                  (zebra (user)
+                    (when (not (last-speaker-same-p user)) (setf zebra (not zebra)))
+                    (if zebra
+                        "zebra"
+                        "")))
+           (loop for line in (get-log year month day)
+              do (destructuring-bind (timestamp user message)
+                     (chat-log-parts line)
+                   (htm
+                    (:tr
+                     :class (zebra user)
+                     (htm
+                      (:td (princ timestamp s))
+                      (:td :class "username" (unless (last-speaker-same-p user) (princ user s)))
+                      (:td (:div :class "message-div" (princ message s))))
+                     (setf last-speaker user))))))))))))
 
 (defun css (&rest ignore)
   (ultralight-css:css
