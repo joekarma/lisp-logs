@@ -61,53 +61,56 @@
     (:html
      (:head
       (:title "Lisp Logs")
+      (:link :rel "stylesheet" :type "text/css" :href "http://fonts.googleapis.com/css?family=Sail")
       (:style :type "text/css"
               (htm (princ (css) s))))
      (:body
       (:div :id "header"
             (:h1 "Lisp Logs")
             (:canvas :id "header-canvas"))
-      (:table 
-       (let ((zebra nil)
-             (last-speaker ""))
-         (labels ((last-speaker-same-p (speaker)
-                    (string= speaker last-speaker))
-                  (zebra (user)
-                    (when (not (last-speaker-same-p user)) (setf zebra (not zebra)))
-                    (if zebra
-                        "zebra"
-                        "")))
-           (loop for line in (get-log year month day)
-              do (destructuring-bind (timestamp user message)
-                     (chat-log-parts line)
-                   (htm
-                    (:tr
-                     :class (zebra user)
-                     (htm
-                      (:td (princ timestamp s))
-                      (:td :class "username" (unless (last-speaker-same-p user) (princ user s)))
-                      (:td (:div :class "message-div" (princ message s))))
-                     (setf last-speaker user))))))))))))
+      (:div :class "table-wrapper"
+            (:table 
+             (let ((zebra nil)
+                   (last-speaker ""))
+               (labels ((last-speaker-same-p (speaker)
+                          (string= speaker last-speaker))
+                        (zebra (user)
+                          (when (not (last-speaker-same-p user)) (setf zebra (not zebra)))
+                          (if zebra
+                              "zebra"
+                              "")))
+                 (loop for line in (get-log year month day)
+                    do (destructuring-bind (timestamp user message)
+                           (chat-log-parts line)
+                         (htm
+                          (:tr
+                           :class (zebra user)
+                           (htm
+                            (:td :class "timestamp" (princ timestamp s))
+                            (:td :class "username" (unless (last-speaker-same-p user) (princ user s)))
+                            (:td (:div :class "message-div" (princ message s))))
+                           (setf last-speaker user)))))))))))))
 
 (defun css (&rest ignore)
   (ultralight-css:css
    '(("html, body"      :border "0" :padding "0" :margin "0")
      ("body"            :background-color "#fafafa"
-                        :color "black"
-                        :font-family "monaco"
-                        :font-size "12px")
+                        :color "#303030"
+                        :font-family "Garamond"
+                        :font-size "18px")
      ("table, td, tr"   :border "0" :padding "0" :border-collapse "collapse")
+     (".table-wrapper"    
+                        :border-top "double #c0c0c0 20px")
      ("table"           :width "600px"
                         :background-color "white"
                         :border-left "solid #eaeaea 20px"
                         :border-right "solid #eaeaea 20px"
-                        :border-top "solid #eaeaea 20px"
                         :margin-left "auto"
                         :margin-right "auto")
      ("#header"         :width "640px" :height "200px"
                         :margin-left "auto" :margin-right "auto")
      ("h1"              :text-align "center"
-                        :font-family " Cambria, serif"
+                        :font-family "Garamond"
                         :font-size "80px"
                         :font-style "oblique"
                         :font-weight "normal"
@@ -125,8 +128,14 @@
      ("td"              :padding "10px"
                         :vertical-align "top"
                         :background-color "#fefefe")
-     ("tr:hover td"     :background-color "#fcfff9")
-     ("td.username"     :text-align "center")
+     (".timestamp"      :text-align "center"
+                        :padding-left "20px"
+                        :padding-right "0"
+                        :color "#c0c0c0")
+     ("td.username"     :text-align "center"
+                        :font-family "Sail"
+                        :color "black"
+                        :font-size "20px")
      ("div.message-div" :width "400px"
                         :word-wrap "break-word"))))
 
